@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
+using WasmLib;
+
 namespace WasmKit
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static int Main(string[] args)
         {
+            using (FileStream input = File.Open(@".\sample.wasm", FileMode.Open, FileAccess.Read)) {
+                WasmModule.Create(input);
+            }
+            return 0;
         }
     }
 }
