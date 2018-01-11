@@ -39,6 +39,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ParsingErrorMessages.resx</DependentUpon>
     </Compile>
+    <Compile Include="SectionTypes.cs" />
     <Compile Include="WasmModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WasmModuleSection.cs" />
