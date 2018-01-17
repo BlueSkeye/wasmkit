@@ -61,11 +61,65 @@ namespace WasmLib {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à Function body length mismatch. Expected 0x{0:X8}. Found 0x{1:X8}..
+        /// </summary>
+        internal static string FunctionBodyLengthMismatch {
+            get {
+                return ResourceManager.GetString("FunctionBodyLengthMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Function body count doesn&apos;t match function definition count..
+        /// </summary>
+        internal static string FunctionDefVsBodyCountMismatch {
+            get {
+                return ResourceManager.GetString("FunctionDefVsBodyCountMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à An incomplete section has been encountered in the input stream..
         /// </summary>
         internal static string IncompleteSectionEncountered {
             get {
                 return ResourceManager.GetString("IncompleteSectionEncountered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à An internal error has been encountered..
+        /// </summary>
+        internal static string InternalError {
+            get {
+                return ResourceManager.GetString("InternalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Invalid section order in module. Section &apos;{0}&apos; found after section &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidSectionDefinitionOrder {
+            get {
+                return ResourceManager.GetString("InvalidSectionDefinitionOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Invalid encoded type encountered. Expected 0x{0:X2}. Found 0x{1:X2}..
+        /// </summary>
+        internal static string InvalidTypeEncountered {
+            get {
+                return ResourceManager.GetString("InvalidTypeEncountered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Expecting a value type tag. Found {0}..
+        /// </summary>
+        internal static string InvalidValueTypeEncountered {
+            get {
+                return ResourceManager.GetString("InvalidValueTypeEncountered", resourceCulture);
             }
         }
         
@@ -84,6 +138,33 @@ namespace WasmLib {
         internal static string MissingModuleMagicNumber {
             get {
                 return ResourceManager.GetString("MissingModuleMagicNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Unexpected built-in type identifier {0}. {1} was expected..
+        /// </summary>
+        internal static string UnexpectedBuiltinType {
+            get {
+                return ResourceManager.GetString("UnexpectedBuiltinType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Unknown section type 0x{0:X2} encountered..
+        /// </summary>
+        internal static string UnknownSectionType {
+            get {
+                return ResourceManager.GetString("UnknownSectionType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Unrecognized external kind value {0}..
+        /// </summary>
+        internal static string UnrecognizedExternalKind {
+            get {
+                return ResourceManager.GetString("UnrecognizedExternalKind", resourceCulture);
             }
         }
         

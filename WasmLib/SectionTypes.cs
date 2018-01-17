@@ -2,7 +2,7 @@
 {
     public enum SectionTypes : byte
     {
-        Unknown = 0,
+        Custom = 0,
         /// <summary>Function signature declarations</summary>
         Type = 1,
         /// <summary>Import declarations</summary>

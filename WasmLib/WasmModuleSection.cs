@@ -1,32 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WasmLib
 {
-    internal class WasmModuleSection
+    // TODO : Make this class an abstract one and define additional per type concrete ones.
+    public class WasmModuleSection
     {
         private WasmModuleSection()
         {
         }
 
-        internal WasmModuleSection(int sectionId)
+        internal WasmModuleSection(SectionTypes type)
             : this()
         {
-            Id = sectionId;
+            if (!Enum.IsDefined(typeof(SectionTypes), type)) {
+                throw new ArgumentException();
+            }
+            Type = type;
         }
 
         internal WasmModuleSection(string sectionName)
             : this()
         {
             if (string.IsNullOrEmpty(sectionName)) { throw new ArgumentNullException(); }
-            Id = 0;
+            Type = 0;
             Name = sectionName;
         }
 
-        internal int Id { get; private set; }
-
         internal string Name { get; private set; }
+
+        internal SectionTypes Type { get; private set; }
+
+        internal void SetRawData(byte[] rawData)
+        {
+            _rawData = rawData;
+        }
+
+        private byte[] _rawData;
     }
 }

@@ -1,0 +1,5 @@
+﻿The base git repository for the documentation is at :
+https://github.com/WebAssembly/spec
+
+The formated documentation can be found at :
+https://webassembly.github.io/spec/core/index.html

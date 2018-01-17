@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +35,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BinaryParsingReader.cs" />
+    <Compile Include="BuiltinLanguageType.cs" />
+    <Compile Include="ExternalKind.cs" />
+    <Compile Include="FunctionDefinition.cs" />
+    <Compile Include="FunctionSignature.cs" />
+    <Compile Include="GlobalVariable.cs" />
+    <Compile Include="ImportDefinition.cs" />
+    <Compile Include="Instruction.cs" />
+    <Compile Include="InstructionDecoder.cs" />
+    <Compile Include="OpCodes.cs" />
     <Compile Include="ParsingErrorMessages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -50,6 +60,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ParsingErrorMessages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="KB.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -117,14 +117,41 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="FunctionBodyLengthMismatch" xml:space="preserve">
+    <value>Function body length mismatch. Expected 0x{0:X8}. Found 0x{1:X8}.</value>
+  </data>
+  <data name="FunctionDefVsBodyCountMismatch" xml:space="preserve">
+    <value>Function body count doesn't match function definition count.</value>
+  </data>
   <data name="IncompleteSectionEncountered" xml:space="preserve">
     <value>An incomplete section has been encountered in the input stream.</value>
+  </data>
+  <data name="InternalError" xml:space="preserve">
+    <value>An internal error has been encountered.</value>
+  </data>
+  <data name="InvalidSectionDefinitionOrder" xml:space="preserve">
+    <value>Invalid section order in module. Section '{0}' found after section '{1}'.</value>
+  </data>
+  <data name="InvalidTypeEncountered" xml:space="preserve">
+    <value>Invalid encoded type encountered. Expected 0x{0:X2}. Found 0x{1:X2}.</value>
+  </data>
+  <data name="InvalidValueTypeEncountered" xml:space="preserve">
+    <value>Expecting a value type tag. Found {0}.</value>
   </data>
   <data name="LEB128DecodingFailure" xml:space="preserve">
     <value>The LEB128 encoded value is greater than expected.</value>
   </data>
   <data name="MissingModuleMagicNumber" xml:space="preserve">
     <value>The expected module magic number is missing. Expecting 0x{0:X8}, found 0x{1:X8}.</value>
+  </data>
+  <data name="UnexpectedBuiltinType" xml:space="preserve">
+    <value>Unexpected built-in type identifier {0}. {1} was expected.</value>
+  </data>
+  <data name="UnknownSectionType" xml:space="preserve">
+    <value>Unknown section type 0x{0:X2} encountered.</value>
+  </data>
+  <data name="UnrecognizedExternalKind" xml:space="preserve">
+    <value>Unrecognized external kind value {0}.</value>
   </data>
   <data name="UnsupportedModuleFormatVersion" xml:space="preserve">
     <value>Module format version {0} is unsupported. We supporte version from {1} to {2}.</value>
