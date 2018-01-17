@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
+using WasmLib.Bytecode;
+
 namespace WasmLib
 {
     public class WasmModule
@@ -38,6 +40,11 @@ namespace WasmLib
             Console.WriteLine("Local accessor reuse ratio = {0}.", LocalAccessorInstruction.ReuseRatio);
             Console.WriteLine("Loop reuse ratio = {0}.", LoopInstruction.ReuseRatio);
             Console.WriteLine("{0} memory control instructions.", MemoryControlInstruction.UseCount);
+        }
+
+        public IEnumerable<FunctionDefinition> EnumerateFunctions()
+        {
+            foreach (FunctionDefinition function in _functions) { yield return function; }
         }
 
         /// <summary></summary>
@@ -332,6 +339,13 @@ namespace WasmLib
             }
             // TODO Check for match between payloadSize and current stream position.
             return;
+        }
+
+        /// <summary>Applies the validation process on this module.</summary>
+        /// <returns>True if module is considered valid. False otherwise.</returns>
+        internal bool Validate()
+        {
+            return new WasmModuleValidator(this).Validate();
         }
 
         private const int MagicModuleNumber = 0x6D736100; // '\0asm'

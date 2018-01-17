@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using WasmLib.Bytecode;
+
 namespace WasmLib
 {
-    internal class FunctionDefinition
+    public class FunctionDefinition
     {
         internal FunctionDefinition(FunctionSignature signature)
         {
@@ -13,6 +15,11 @@ namespace WasmLib
 
         /// <summary>A debug identifier. Not part of the binary format.</summary>
         internal int Id { get; private set; }
+
+        internal IEnumerable<Instruction> EnumerateInstructions()
+        {
+            foreach (Instruction instruction in _instructions) { yield return instruction; }
+        }
 
         internal void SetBody(List<Instruction> instructions)
         {

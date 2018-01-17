@@ -36,12 +36,24 @@
   <ItemGroup>
     <Compile Include="BinaryParsingReader.cs" />
     <Compile Include="BuiltinLanguageType.cs" />
+    <Compile Include="Bytecode\BlockInstruction.cs" />
+    <Compile Include="Bytecode\BranchInstruction.cs" />
+    <Compile Include="Bytecode\BranchTableInstruction.cs" />
+    <Compile Include="Bytecode\CallInstruction.cs" />
+    <Compile Include="Bytecode\ConstantValueInstruction.cs" />
+    <Compile Include="Bytecode\GlobalAccessorInstruction.cs" />
+    <Compile Include="Bytecode\IfInstruction.cs" />
+    <Compile Include="Bytecode\LocalAccessorInstruction.cs" />
+    <Compile Include="Bytecode\LoopInstruction.cs" />
+    <Compile Include="Bytecode\MemoryAccessInstruction.cs" />
+    <Compile Include="Bytecode\MemoryControlInstruction.cs" />
+    <Compile Include="Bytecode\ReusableInstruction.cs" />
     <Compile Include="ExternalKind.cs" />
     <Compile Include="FunctionDefinition.cs" />
     <Compile Include="FunctionSignature.cs" />
     <Compile Include="GlobalVariable.cs" />
     <Compile Include="ImportDefinition.cs" />
-    <Compile Include="Instruction.cs" />
+    <Compile Include="Bytecode\Instruction.cs" />
     <Compile Include="InstructionDecoder.cs" />
     <Compile Include="OpCodes.cs" />
     <Compile Include="ParsingErrorMessages.Designer.cs">
@@ -50,9 +62,11 @@
       <DependentUpon>ParsingErrorMessages.resx</DependentUpon>
     </Compile>
     <Compile Include="SectionTypes.cs" />
+    <Compile Include="ValidationContext.cs" />
     <Compile Include="WasmModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WasmModuleSection.cs" />
+    <Compile Include="WasmModuleValidator.cs" />
     <Compile Include="WasmParsingException.cs" />
   </ItemGroup>
   <ItemGroup>

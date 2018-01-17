@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using WasmLib.Bytecode;
+
 namespace WasmLib
 {
     internal class GlobalVariable

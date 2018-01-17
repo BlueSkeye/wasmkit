@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+using WasmLib.Bytecode;
+
 namespace WasmLib
 {
     /// <summary>A binary reader that handling the specific encodings from a module
