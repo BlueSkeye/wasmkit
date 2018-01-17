@@ -334,74 +334,18 @@ namespace WasmLib
             return;
         }
 
-        ///// <summary>Register a new section in the module. This method is only valid for an
-        ///// existing wasm module because we enforce the expected section order defined in the
-        ///// specification.</summary>
-        ///// <param name="section">The section to be registered.</param>
-        //private void RegisterParsedSection(WasmModuleSection section)
-        //{
-        //    if (SectionTypes.Custom == section.Type) {
-                
-        //        return;
-        //    }
-        //    // This test will ensure a non custom section can't be parsed twice as per
-        //    // the specification. We seems to be more stringent here than the specification
-        //    // that seems to state that the section COULD be ignored.
-        //    if (section.Type <= _lastParsedSectionType) {
-        //        throw new WasmParsingException(string.Format(
-        //            ParsingErrorMessages.InvalidSectionDefinitionOrder,
-        //            section.Type, _lastParsedSectionType));
-        //    }
-        //    switch (section.Type) {
-        //        case SectionTypes.Table:
-        //            _tableSection = section;
-        //            break;
-        //        case SectionTypes.Memory:
-        //            _memorySection = section;
-        //            break;
-        //        case SectionTypes.Global:
-        //            _globalSection = section;
-        //            break;
-        //        case SectionTypes.Export:
-        //            _exportSection = section;
-        //            break;
-        //        case SectionTypes.Start:
-        //            _startSection = section;
-        //            break;
-        //        case SectionTypes.Element:
-        //            _elementSection = section;
-        //            break;
-        //        case SectionTypes.Code:
-        //            _codeSection = section;
-        //            break;
-        //        case SectionTypes.Data:
-        //            _dataSection = section;
-        //            break;
-        //        default:
-        //            throw new WasmParsingException(string.Format(
-        //                ParsingErrorMessages.UnknownSectionType, section.Type));
-        //    }
-        //    _lastParsedSectionType = section.Type;
-        //}
-
         private const int MagicModuleNumber = 0x6D736100; // '\0asm'
         private const int MaximumSupportedModuleFormatVersion = 1;
         private const int MinimumSupportedModuleFormatVersion = 1;
         private List<WasmModuleSection> _customSections = new List<WasmModuleSection>();
-        private WasmModuleSection _codeSection;
-        private WasmModuleSection _dataSection;
-
         private List<DataSegment> _dataSegments;
         private InstructionDecoder _decoder;
-        private WasmModuleSection _elementSection;
-        private WasmModuleSection _exportSection;
         private List<FunctionDefinition> _functions = new List<FunctionDefinition>();
         private List<FunctionSignature> _functionSignatures = new List<FunctionSignature>();
         private List<GlobalVariable> _globalVariables = new List<GlobalVariable>();
         private SectionTypes _lastParsedSectionType = SectionTypes.Custom;
         private Dictionary<string, List<ImportedItemDefinition>> _perModuleImportedItems =
             new Dictionary<string, List<ImportedItemDefinition>>();
-        private WasmModuleSection _startSection;
 
         internal class DataSegment
         {
