@@ -20,19 +20,26 @@ namespace WasmLib
         internal bool Validate()
         {
             bool result = true;
+            ValidationContext context = new ValidationContext(_module);
 
-
-            foreach(FunctionDefinition function in _module.EnumerateFunctions()) {
-                result &= Validate(function);
+            foreach (FunctionDefinition function in _module.EnumerateFunctions()) {
+                result &= Validate(context, function);
             }
             return result;
         }
 
-        private bool Validate(FunctionDefinition function)
+        private bool Validate(ValidationContext context, FunctionDefinition function)
         {
-            throw new NotImplementedException();
-            //foreach(Instruction instruction in function.EnumerateInstructions()) {
-            //}
+            foreach (Instruction instruction in function.EnumerateInstructions()) {
+                context.Reset(function);
+                instruction.Validate(context);
+            }
+            if (0 == context.Errors.Count) { return true; }
+            Console.WriteLine("Error encountered on function #{0}", function.Id);
+            foreach(string error in context.Errors) {
+                Console.WriteLine(error);
+            }
+            return false;
         }
 
         private WasmModule _module;

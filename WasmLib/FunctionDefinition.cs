@@ -13,6 +13,8 @@ namespace WasmLib
             Id = ++LastId;
         }
 
+        internal BuiltinLanguageType[] Locals { get; private set; }
+
         /// <summary>A debug identifier. Not part of the binary format.</summary>
         internal int Id { get; private set; }
 
@@ -23,14 +25,19 @@ namespace WasmLib
 
         internal void SetBody(List<Instruction> instructions)
         {
-            if ((null == instructions) || (0 == instructions.Count)) {
-                throw new ArgumentNullException();
-            }
+            if ((null == instructions) || (0 == instructions.Count)) { throw new ArgumentNullException(); }
             _instructions = instructions;
+        }
+
+        internal void SetLocalTypes(BuiltinLanguageType[] types)
+        {
+            if (null != Locals) { throw new InvalidOperationException(); }
+            Locals = types;
         }
 
         private static int LastId = 0;
         private List<Instruction> _instructions;
+        private BuiltinLanguageType[] _locals;
         private FunctionSignature _signature;
     }
 }

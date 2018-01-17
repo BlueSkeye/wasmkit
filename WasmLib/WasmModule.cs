@@ -13,6 +13,12 @@ namespace WasmLib
     {
         private WasmModule()
         {
+            return;
+        }
+
+        internal int GlobalsCount
+        {
+            get { return _globalVariables.Count; }
         }
 
         /// <summary>Create a module from an input stream.</summary>
@@ -45,6 +51,11 @@ namespace WasmLib
         public IEnumerable<FunctionDefinition> EnumerateFunctions()
         {
             foreach (FunctionDefinition function in _functions) { yield return function; }
+        }
+
+        internal IEnumerable<GlobalVariable> EnumerateGlobalVariables()
+        {
+            foreach (GlobalVariable variable in _globalVariables) { yield return variable; }
         }
 
         /// <summary></summary>
@@ -111,14 +122,24 @@ namespace WasmLib
             }
         }
 
+        private List<BuiltinLanguageType> _currentFunctionLocals = new List<BuiltinLanguageType>();
+
         private void ParseFunctionBody(BinaryParsingReader reader, FunctionDefinition target)
         {
             uint bodySize = reader.ReadVarUint32();
             long startPosition = reader.BaseStream.Position;
             uint localsEntryCount = reader.ReadVarUint32();
-            for (int localEntryIndex = 0; localEntryIndex < localsEntryCount; localEntryIndex++) {
-                uint variablesCount = reader.ReadVarUint32();
-                sbyte valuesType = reader.ReadValueType();
+            lock (_currentFunctionLocals) {
+                if (0 < localsEntryCount) {
+                    for (int localEntryIndex = 0; localEntryIndex < localsEntryCount; localEntryIndex++) {
+                        uint variablesCount = reader.ReadVarUint32();
+                        BuiltinLanguageType valuesType = (BuiltinLanguageType)reader.ReadValueType();
+                        for(uint index = 0; index < variablesCount; index++) {
+                            _currentFunctionLocals.Add(valuesType);
+                        }
+                    }
+                    target.SetLocalTypes(_currentFunctionLocals.ToArray());
+                }
             }
             List<Instruction> instructions = reader.ReadFunctionBodyCode();
             long endPosition = reader.BaseStream.Position;
@@ -343,7 +364,7 @@ namespace WasmLib
 
         /// <summary>Applies the validation process on this module.</summary>
         /// <returns>True if module is considered valid. False otherwise.</returns>
-        internal bool Validate()
+        public bool Validate()
         {
             return new WasmModuleValidator(this).Validate();
         }

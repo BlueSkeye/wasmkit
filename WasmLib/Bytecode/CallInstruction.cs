@@ -33,7 +33,7 @@ namespace WasmLib.Bytecode
             return OpCode.ToString() + string.Format(" 0x{0:X8} {1}", ItemIndex, Indirect ? "(I)" : string.Empty);
         }
 
-        internal override bool Validate(Stack<sbyte> stack, ValidationContext context)
+        internal override bool Validate(ValidationContext context)
         {
             throw new NotImplementedException();
         }

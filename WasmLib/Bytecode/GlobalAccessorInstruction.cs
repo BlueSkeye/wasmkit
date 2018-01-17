@@ -16,6 +16,11 @@ namespace WasmLib.Bytecode
 
         public uint GlobalIndex { get; private set; }
 
+        public bool IsGetter
+        {
+            get { return OpCodes.GetGlobal == OpCode; }
+        }
+
         internal static float ReuseRatio
         {
             get { return (float)_reuseCount / (float)(_reuseCount + _knownGlobalGetters.Length + _knownGlobalSetters.Length); }
@@ -26,8 +31,7 @@ namespace WasmLib.Bytecode
             uint globalIndex = reader.ReadVarUint32();
             OpCodes opcode = getter ? OpCodes.GetGlobal : OpCodes.SetGlobal;
 
-            if (MaxReusableIndex < globalIndex)
-            {
+            if (MaxReusableIndex < globalIndex) {
                 return new GlobalAccessorInstruction(opcode) { GlobalIndex = globalIndex };
             }
 
@@ -35,8 +39,7 @@ namespace WasmLib.Bytecode
             GlobalAccessorInstruction result = reusableAccessors[globalIndex];
 
             if (null != result) { _reuseCount++; }
-            else
-            {
+            else {
                 result = new GlobalAccessorInstruction(opcode) { GlobalIndex = globalIndex };
                 reusableAccessors[globalIndex] = result;
             }
@@ -48,9 +51,22 @@ namespace WasmLib.Bytecode
             return OpCode.ToString() + string.Format(" {0}", GlobalIndex);
         }
 
-        internal override bool Validate(Stack<sbyte> stack, ValidationContext context)
+        internal override bool Validate(ValidationContext context)
         {
-            throw new NotImplementedException();
+            BuiltinLanguageType globalVariableType = context.GetGlobalVariableType(GlobalIndex);
+            if (0 == globalVariableType) { return false; }
+            if (IsGetter) {
+                context.StackPush(globalVariableType);
+                return true;
+            }
+            BuiltinLanguageType poppedType = context.StackPop();
+            if (0 == poppedType) { return false; }
+            if (globalVariableType != poppedType) {
+                context.AddError(string.Format("Attempt to set a {0} global variable with a {1} value.",
+                    globalVariableType, poppedType));
+                return false;
+            }
+            return true;
         }
 
         private const int MaxReusableIndex = 1024;

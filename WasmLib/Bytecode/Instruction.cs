@@ -44,7 +44,7 @@ namespace WasmLib.Bytecode
             return OpCode.ToString();
         }
 
-        internal abstract bool Validate(Stack<sbyte> stack, ValidationContext context);
+        internal abstract bool Validate(ValidationContext context);
 
         internal static readonly Instruction Unreachable = new ReusableInstruction(OpCodes.Unreachable);
         internal static readonly Instruction Nop = new ReusableInstruction(OpCodes.Nop); // No operation

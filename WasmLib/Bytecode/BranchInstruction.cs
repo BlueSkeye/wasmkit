@@ -49,7 +49,7 @@ namespace WasmLib.Bytecode
             return OpCode.ToString() + string.Format(" 0x{0:X2} {1}", Depth, Conditional ? "(C)" : string.Empty);
         }
 
-        internal override bool Validate(Stack<sbyte> stack, ValidationContext context)
+        internal override bool Validate(ValidationContext context)
         {
             throw new NotImplementedException();
         }

@@ -138,7 +138,7 @@ namespace WasmLib.Bytecode
             return OpCode.ToString() + string.Format(" 0x{0:X2}, o=0x{1:X8}, o=0x{2:X8}", (byte)_rawValue, Offset, Align);
         }
 
-        internal override bool Validate(Stack<sbyte> stack, ValidationContext context)
+        internal override bool Validate(ValidationContext context)
         {
             throw new NotImplementedException();
         }

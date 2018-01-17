@@ -12,6 +12,7 @@ namespace WasmKit
             using (FileStream input = File.Open(@".\sample.wasm", FileMode.Open, FileAccess.Read)) {
                 module = WasmModule.Create(input);
             }
+            bool validModule = module.Validate();
             return 0;
         }
     }

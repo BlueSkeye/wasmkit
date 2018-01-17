@@ -26,12 +26,8 @@ namespace WasmLib.Bytecode
             sbyte blockType = reader.ReadVarInt7();
             BlockInstruction result = _perTypeBlock[blockType + 128];
 
-            if (null != result)
-            {
-                _reuseCount++;
-            }
-            else
-            {
+            if (null != result) { _reuseCount++; }
+            else {
                 result = new BlockInstruction() { BlockType = blockType };
                 _perTypeBlock[blockType + 128] = result;
             }
@@ -43,9 +39,10 @@ namespace WasmLib.Bytecode
             return OpCode.ToString() + string.Format(" 0x{0:X2}", BlockType);
         }
 
-        internal override bool Validate(Stack<sbyte> stack, ValidationContext context)
+        internal override bool Validate(ValidationContext context)
         {
-            throw new NotImplementedException();
+            context.CreateLabel(BlockType);
+            return true;
         }
 
         private static int _reuseCount = 0;
