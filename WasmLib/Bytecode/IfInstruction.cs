@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WasmLib.Bytecode
 {
@@ -19,30 +15,30 @@ namespace WasmLib.Bytecode
             get { return (float)_reuseCount / (float)(_reuseCount + _knownTests.Length); }
         }
 
-        internal sbyte ValueType { get; private set; }
+        internal BuiltinLanguageType ValueType { get; private set; }
 
         internal static IfInstruction Create(BinaryParsingReader reader)
         {
-            sbyte valueType = reader.ReadValueType(true);
-            IfInstruction result = _knownTests[valueType + 128];
+            BuiltinLanguageType valueType = reader.ReadValueType(true);
+            IfInstruction result = _knownTests[(int)valueType + 128];
 
             if (null != result) { _reuseCount++; }
-            else
-            {
+            else {
                 result = new IfInstruction() { ValueType = valueType };
-                _knownTests[valueType + 128] = result;
+                _knownTests[(int)valueType + 128] = result;
             }
             return result;
         }
 
         public override string ToString()
         {
-            return OpCode.ToString() + string.Format(" 0x{0:X2}", ValueType);
+            return OpCode.ToString() +  " " + ValueType.ToString();
         }
 
         internal override bool Validate(ValidationContext context)
         {
-            throw new NotImplementedException();
+            context.CreateLabel(ValueType, true);
+            return true;
         }
 
         private static int _reuseCount = 0;

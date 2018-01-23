@@ -53,6 +53,17 @@ namespace WasmLib
             foreach (FunctionDefinition function in _functions) { yield return function; }
         }
 
+        internal IEnumerable<ImportedGlobalDefinition> EnumerateGlobalImports()
+        {
+            foreach(List<ImportedItemDefinition> definitions in _perModuleImportedItems.Values) {
+                foreach(ImportedItemDefinition definition in definitions) {
+                    if (ExternalKind.Global == definition.Kind) {
+                        yield return (ImportedGlobalDefinition)definition;
+                    }
+                }
+            }
+        }
+
         internal IEnumerable<GlobalVariable> EnumerateGlobalVariables()
         {
             foreach (GlobalVariable variable in _globalVariables) { yield return variable; }
@@ -93,6 +104,7 @@ namespace WasmLib
             for (uint index = 0; index < dataSegmentsCount; index++) {
                 _dataSegments.Add(DataSegment.Create(reader));
             }
+            return;
         }
 
         private void ParseElementSection(BinaryParsingReader reader, uint payloadSize)
@@ -122,8 +134,6 @@ namespace WasmLib
             }
         }
 
-        private List<BuiltinLanguageType> _currentFunctionLocals = new List<BuiltinLanguageType>();
-
         private void ParseFunctionBody(BinaryParsingReader reader, FunctionDefinition target)
         {
             uint bodySize = reader.ReadVarUint32();
@@ -131,6 +141,7 @@ namespace WasmLib
             uint localsEntryCount = reader.ReadVarUint32();
             lock (_currentFunctionLocals) {
                 if (0 < localsEntryCount) {
+                    _currentFunctionLocals.Clear();
                     for (int localEntryIndex = 0; localEntryIndex < localsEntryCount; localEntryIndex++) {
                         uint variablesCount = reader.ReadVarUint32();
                         BuiltinLanguageType valuesType = (BuiltinLanguageType)reader.ReadValueType();
@@ -205,7 +216,8 @@ namespace WasmLib
                     case ExternalKind.Global:
                         bool mutable;
                         BuiltinLanguageType contentType = reader.ReadGlobaltype(out mutable);
-                        break;
+                        imports.Add(new ImportedGlobalDefinition(fieldName, contentType, mutable));
+                        continue;
                     case ExternalKind.Memory:
                         {
                             bool maxPresent = (0 != reader.ReadVarUint1());
@@ -372,6 +384,7 @@ namespace WasmLib
         private const int MagicModuleNumber = 0x6D736100; // '\0asm'
         private const int MaximumSupportedModuleFormatVersion = 1;
         private const int MinimumSupportedModuleFormatVersion = 1;
+        private List<BuiltinLanguageType> _currentFunctionLocals = new List<BuiltinLanguageType>();
         private List<WasmModuleSection> _customSections = new List<WasmModuleSection>();
         private List<DataSegment> _dataSegments;
         private InstructionDecoder _decoder;
@@ -429,19 +442,6 @@ namespace WasmLib
                 }
                 return new Element() { Elements = elements, OffsetExpression = offsetExpression, TableIndex = tableIndex };
             }
-        }
-
-        internal class ImportedItemDefinition
-        {
-            internal ImportedItemDefinition(string name, ExternalKind kind)
-            {
-                Kind = kind;
-                ItemName = name ?? throw new ArgumentNullException("name");
-            }
-
-            public ExternalKind Kind { get; protected set; }
-
-            public string ItemName { get; protected set; }
         }
     }
 }

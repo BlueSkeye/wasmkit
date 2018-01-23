@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace WasmLib.Bytecode
 {
     internal class GlobalAccessorInstruction : Instruction
@@ -34,14 +29,13 @@ namespace WasmLib.Bytecode
             if (MaxReusableIndex < globalIndex) {
                 return new GlobalAccessorInstruction(opcode) { GlobalIndex = globalIndex };
             }
-
-            GlobalAccessorInstruction[] reusableAccessors = getter ? _knownGlobalGetters : _knownGlobalSetters;
-            GlobalAccessorInstruction result = reusableAccessors[globalIndex];
+            GlobalAccessorInstruction[] reuseTarget = getter ? _knownGlobalGetters : _knownGlobalSetters;
+            GlobalAccessorInstruction result = reuseTarget[globalIndex];
 
             if (null != result) { _reuseCount++; }
             else {
                 result = new GlobalAccessorInstruction(opcode) { GlobalIndex = globalIndex };
-                reusableAccessors[globalIndex] = result;
+                reuseTarget[globalIndex] = result;
             }
             return result;
         }
@@ -60,7 +54,7 @@ namespace WasmLib.Bytecode
                 return true;
             }
             BuiltinLanguageType poppedType = context.StackPop();
-            if (0 == poppedType) { return false; }
+            if (0 == poppedType) { context.AddError("Attempt to pop an empty stack."); }
             if (globalVariableType != poppedType) {
                 context.AddError(string.Format("Attempt to set a {0} global variable with a {1} value.",
                     globalVariableType, poppedType));

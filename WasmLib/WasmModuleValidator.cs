@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define TRACE_CODE
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,13 @@ namespace WasmLib
             bool result = true;
             ValidationContext context = new ValidationContext(_module);
 
+            Console.WriteLine("Validating functions body.");
+            int functionIndex = 0;
             foreach (FunctionDefinition function in _module.EnumerateFunctions()) {
+#if TRACE_CODE
+                Console.WriteLine("#{0} ==================================", ++functionIndex);
+                if (5 == functionIndex) { int i = 1; }
+#endif
                 result &= Validate(context, function);
             }
             return result;
@@ -30,9 +37,14 @@ namespace WasmLib
 
         private bool Validate(ValidationContext context, FunctionDefinition function)
         {
+            context.Reset(function);
             foreach (Instruction instruction in function.EnumerateInstructions()) {
-                context.Reset(function);
-                instruction.Validate(context);
+#if TRACE_CODE
+                Console.WriteLine(instruction.ToString());
+#endif
+                // Must break immediately. Continuing is meaningless because the context is not
+                // accurate anymore.
+                if (!instruction.Validate(context)) { break; }
             }
             if (0 == context.Errors.Count) { return true; }
             Console.WriteLine("Error encountered on function #{0}", function.Id);

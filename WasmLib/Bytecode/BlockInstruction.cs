@@ -14,7 +14,7 @@ namespace WasmLib.Bytecode
             return;
         }
 
-        internal sbyte BlockType { get; private set; }
+        internal BuiltinLanguageType BlockType { get; private set; }
 
         internal static float ReuseRatio
         {
@@ -23,25 +23,25 @@ namespace WasmLib.Bytecode
 
         internal static BlockInstruction Create(BinaryParsingReader reader)
         {
-            sbyte blockType = reader.ReadVarInt7();
-            BlockInstruction result = _perTypeBlock[blockType + 128];
+            BuiltinLanguageType blockType = (BuiltinLanguageType)reader.ReadVarInt7();
+            BlockInstruction result = _perTypeBlock[(int)blockType + 128];
 
             if (null != result) { _reuseCount++; }
             else {
                 result = new BlockInstruction() { BlockType = blockType };
-                _perTypeBlock[blockType + 128] = result;
+                _perTypeBlock[(int)blockType + 128] = result;
             }
             return result;
         }
 
         public override string ToString()
         {
-            return OpCode.ToString() + string.Format(" 0x{0:X2}", BlockType);
+            return OpCode.ToString() + " T=" + BlockType.ToString();
         }
 
         internal override bool Validate(ValidationContext context)
         {
-            context.CreateLabel(BlockType);
+            context.CreateLabel(BlockType, false);
             return true;
         }
 

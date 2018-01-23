@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 
@@ -143,6 +144,39 @@ namespace WasmLib
                 case OpCodes.F64Const:
                     // uint64
                     return ConstantValueInstruction<double>.Create(this, OpCodes.F64Const, this.ReadVarFloat64());
+                case OpCodes.F32eq:
+                case OpCodes.F32ge:
+                case OpCodes.F32gt:
+                case OpCodes.F32le:
+                case OpCodes.F32lt:
+                case OpCodes.F32ne:
+                case OpCodes.F64eq:
+                case OpCodes.F64ge:
+                case OpCodes.F64gt:
+                case OpCodes.F64le:
+                case OpCodes.F64lt:
+                case OpCodes.F64ne:
+                case OpCodes.I32eq:
+                case OpCodes.I32ge_s:
+                case OpCodes.I32ge_u:
+                case OpCodes.I32gt_s:
+                case OpCodes.I32gt_u:
+                case OpCodes.I32le_s:
+                case OpCodes.I32le_u:
+                case OpCodes.I32lt_s:
+                case OpCodes.I32lt_u:
+                case OpCodes.I32ne:
+                case OpCodes.I64eq:
+                case OpCodes.I64ge_s:
+                case OpCodes.I64ge_u:
+                case OpCodes.I64gt_s:
+                case OpCodes.I64gt_u:
+                case OpCodes.I64le_s:
+                case OpCodes.I64le_u:
+                case OpCodes.I64lt_s:
+                case OpCodes.I64lt_u:
+                case OpCodes.I64ne:
+                    return RelationalInstruction.Create(opcode);
                 default:
                     throw new NotSupportedException();
             }
@@ -161,20 +195,20 @@ namespace WasmLib
             return Encoding.UTF8.GetString(_stringDataBuffer);
         }
 
-        internal sbyte ReadValueType(bool allowVoid = false)
+        internal BuiltinLanguageType ReadValueType(bool allowVoid = false)
         {
-            sbyte tag = this.ReadVarInt7();
+            BuiltinLanguageType tag = (BuiltinLanguageType)this.ReadVarInt7();
 
             switch (tag) {
-                case -1:
-                case -2:
-                case -3:
-                case -4:
+                case BuiltinLanguageType.I32:
+                case BuiltinLanguageType.I64:
+                case BuiltinLanguageType.F32:
+                case BuiltinLanguageType.F64:
                     return tag;
                 default:
-                    if (allowVoid && (-64 == tag)) { return tag; }
+                    if (allowVoid && (BuiltinLanguageType.EmptyBlock == tag)) { return tag; }
                     throw new WasmParsingException(string.Format(
-                        ParsingErrorMessages.InvalidValueTypeEncountered, tag));
+                        ParsingErrorMessages.InvalidValueTypeEncountered, tag.ToString()));
             }
         }
 

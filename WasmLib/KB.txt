@@ -3,3 +3,36 @@ https://github.com/WebAssembly/spec
 
 The formated documentation can be found at :
 https://webassembly.github.io/spec/core/index.html
+
+t.load memory execution algorithm m
+1. Let 𝐹 be the current frame.
+2. Assert: due to validation, 𝐹.module.memaddrs[0] exists.
+3. Let 𝑎 be the memory address 𝐹.module.memaddrs[0].
+4. Assert: due to validation, 𝑆.mems[𝑎] exists.
+5. Let mem be the memory instance 𝑆.mems[𝑎].
+6. Assert: due to validation, a value of value type i32 is on the top of the stack.
+7. Pop the value i32.const 𝑖 from the stack.
+8. Let ea be the integer 𝑖 + memarg.offset.
+9. If 𝑁 is not part of the instruction, then:
+	(a) Let 𝑁 be the bit width |𝑡| of value type 𝑡.
+10. If ea + 𝑁/8 is larger than the length of mem.data, then:
+	(a) Trap.
+11. Let 𝑏* be the byte sequence mem.data[ea : 𝑁/8].
+12. If 𝑁 and sx are part of the instruction, then:
+	(a) Let 𝑛 be the integer for which bytesi𝑁 (𝑛) = 𝑏.
+	(b) Let 𝑐 be the result of computing extend_sx 𝑁,|𝑡|(𝑛).
+13. Else:
+	(a) Let 𝑐 be the constant for which bytes𝑡(𝑐) = 𝑏*.
+14. Push the value 𝑡.const 𝑐 to the stack.
+	𝑆; 𝐹; (i32.const 𝑖) (𝑡.load memarg) ˓→ 𝑆; 𝐹; (𝑡.const 𝑐)
+		(if ea = 𝑖 + memarg.offset
+		∧ ea + |𝑡|/8 ≤ |𝑆.mems[𝐹.module.memaddrs[0]].data|
+		∧ bytes𝑡(𝑐) = 𝑆.mems[𝐹.module.memaddrs[0]].data[ea : |𝑡|/8])
+	𝑆; 𝐹; (i32.const 𝑖) (𝑡.load𝑁_sx memarg) ˓→ 𝑆; 𝐹; (𝑡.const extend_sx 𝑁,|𝑡|(𝑛))
+		(if ea = 𝑖 + memarg.offset
+		∧ ea + 𝑁/8 ≤ |𝑆.mems[𝐹.module.memaddrs[0]].data|
+		∧ bytesi𝑁 (𝑛) = 𝑆.mems[𝐹.module.memaddrs[0]].data[ea : 𝑁/8])
+	𝑆; 𝐹; (i32.const 𝑘) (𝑡.load(𝑁_sx )
+		? memarg) ˓→ 𝑆; 𝐹;trap
+		(otherwise)
+

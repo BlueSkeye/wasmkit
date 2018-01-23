@@ -8,6 +8,13 @@ namespace WasmLib
         {
         }
 
+        internal BuiltinLanguageType ReturnType { get; private set; }
+
+        internal IEnumerable<BuiltinLanguageType> EnumerateParameters()
+        {
+            foreach(BuiltinLanguageType type in _parametersType) { yield return type; }
+        }
+
         internal static FunctionSignature Parse(BinaryParsingReader reader)
         {
             FunctionSignature result = new FunctionSignature();
@@ -15,14 +22,13 @@ namespace WasmLib
             uint parametersCount = reader.ReadVarUint32();
 
             for(uint index = 0; index < parametersCount; index++) {
-                result._parametersType.Add(reader.ReadValueType());
+                result._parametersType.Add((BuiltinLanguageType)reader.ReadValueType());
             }
 
-            result._returnType = (1 == reader.ReadVarUint1()) ? reader.ReadValueType() : (sbyte)0;
+            result.ReturnType = (1 == reader.ReadVarUint1()) ? (BuiltinLanguageType)reader.ReadValueType() : 0;
             return result;
         }
 
-        private List<sbyte> _parametersType = new List<sbyte>();
-        private sbyte _returnType;
+        private List<BuiltinLanguageType> _parametersType = new List<BuiltinLanguageType>();
     }
 }

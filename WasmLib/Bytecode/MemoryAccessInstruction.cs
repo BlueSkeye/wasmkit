@@ -42,8 +42,7 @@ namespace WasmLib.Bytecode
             // uint localIndex = reader.ReadVarUint32();
             RawValueEncoding rawValue;
             bool store = false;
-            switch (opcode)
-            {
+            switch (opcode) {
                 case OpCodes.I32Store:
                     store = true;
                     goto case OpCodes.I32Load;
@@ -123,8 +122,7 @@ namespace WasmLib.Bytecode
             }
             uint flags = reader.ReadVarUint32();
             uint offset = reader.ReadVarUint32();
-            return new MemoryAccessInstruction(opcode)
-            {
+            return new MemoryAccessInstruction(opcode) {
                 _rawValue = rawValue,
                 IsStore = store,
                 IsLoad = !store,
@@ -140,7 +138,84 @@ namespace WasmLib.Bytecode
 
         internal override bool Validate(ValidationContext context)
         {
-            throw new NotImplementedException();
+            // We assume mems[0] always exist.
+            BuiltinLanguageType transferedValueType = 0;
+
+            int maxAlignment;
+
+            switch (OpCode) {
+                case OpCodes.I32Load8_s:
+                case OpCodes.I32Load8_u:
+                case OpCodes.I32Store8:
+                    transferedValueType = BuiltinLanguageType.I32;
+                    maxAlignment = 1;
+                    break;
+                case OpCodes.I64Load8_s:
+                case OpCodes.I64Load8_u:
+                case OpCodes.I64Store8:
+                    transferedValueType = BuiltinLanguageType.I64;
+                    maxAlignment = 1;
+                    break;
+                case OpCodes.I32Load16_s:
+                case OpCodes.I32Load16_u:
+                case OpCodes.I32Store16:
+                    transferedValueType = BuiltinLanguageType.I32;
+                    maxAlignment = 2;
+                    break;
+                case OpCodes.I64Load16_s:
+                case OpCodes.I64Load16_u:
+                case OpCodes.I64Store16:
+                    transferedValueType = BuiltinLanguageType.I64;
+                    maxAlignment = 2;
+                    break;
+                case OpCodes.I32Load:
+                case OpCodes.I32Store:
+                    transferedValueType = BuiltinLanguageType.I32;
+                    maxAlignment = 4;
+                    break;
+                case OpCodes.F32Load:
+                case OpCodes.F32Store:
+                    transferedValueType = BuiltinLanguageType.F32;
+                    maxAlignment = 4;
+                    break;
+                case OpCodes.I64Load:
+                case OpCodes.I64Store:
+                case OpCodes.I64Load32_s:
+                case OpCodes.I64Load32_u:
+                case OpCodes.I64Store32:
+                    transferedValueType = BuiltinLanguageType.I64;
+                    maxAlignment = 4;
+                    break;
+                case OpCodes.F64Load:
+                case OpCodes.F64Store:
+                    transferedValueType = BuiltinLanguageType.F64;
+                    maxAlignment = 8;
+                    break;
+                default:
+                    throw new ApplicationException();
+            }
+            if ((0 < Align) && (2 << (int)(Align - 1)) > maxAlignment) {
+                context.AddError(string.Format("Align value {0} exceeds max allowed value {1} for type {2}",
+                    Align, maxAlignment, transferedValueType.ToString()));
+                return false;
+            }
+
+            if (IsStore) {
+                BuiltinLanguageType valueType = context.StackPop();
+                if (transferedValueType != valueType) {
+                    context.AddError(string.Format("Expected an {0} value on the stack. Found an {1}",
+                        transferedValueType.ToString(), valueType.ToString()));
+                    return false;
+                }
+            }
+            BuiltinLanguageType memoryAddressType = context.StackPop();
+            if (BuiltinLanguageType.I32 != memoryAddressType) {
+                context.AddError(string.Format("Expected an I32 on the stack. Found an {0}",
+                    memoryAddressType.ToString()));
+                return false;
+            }
+            if (IsLoad) { context.StackPush(transferedValueType); }
+            return true;
         }
 
         private RawValueEncoding _rawValue;

@@ -42,7 +42,22 @@ namespace WasmLib.Bytecode
 
         internal override bool Validate(ValidationContext context)
         {
-            throw new NotImplementedException();
+            switch (OpCode) {
+                case OpCodes.I32Const:
+                    context.StackPush(BuiltinLanguageType.I32);
+                    return true;
+                case OpCodes.I64Const:
+                    context.StackPush(BuiltinLanguageType.I64);
+                    return true;
+                case OpCodes.F32Const:
+                    context.StackPush(BuiltinLanguageType.F32);
+                    return true;
+                case OpCodes.F64Const:
+                    context.StackPush(BuiltinLanguageType.F64);
+                    return true;
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         private static int _reuseCount = 0;
