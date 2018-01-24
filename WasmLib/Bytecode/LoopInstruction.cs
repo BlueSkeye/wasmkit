@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WasmLib.Bytecode
 {
@@ -14,7 +10,7 @@ namespace WasmLib.Bytecode
             return;
         }
 
-        internal sbyte BlockType { get; private set; }
+        internal BuiltinLanguageType BlockType { get; private set; }
 
         internal static float ReuseRatio
         {
@@ -23,29 +19,31 @@ namespace WasmLib.Bytecode
 
         internal static LoopInstruction Create(BinaryParsingReader reader)
         {
-            sbyte blockType = reader.ReadVarInt7();
-            LoopInstruction result = _knownLoops[blockType + 128];
+            BuiltinLanguageType blockType = (BuiltinLanguageType)reader.ReadVarInt7();
+            LoopInstruction result = _knownLoops[(int)blockType + 128];
 
             if (null != result) { _reuseCount++; }
-            else
-            {
+            else {
                 result = new LoopInstruction() { BlockType = blockType };
-                _knownLoops[blockType + 128] = result;
+                _knownLoops[(int)blockType + 128] = result;
             }
             return result;
         }
 
         public override string ToString()
         {
-            return OpCode.ToString() + string.Format(" 0x{0:X2}", BlockType);
+            return OpCode.ToString() + " " + BlockType.ToString();
         }
 
         internal override bool Validate(ValidationContext context)
         {
-            throw new NotImplementedException();
+            context.CreateLabel(BlockType, false);
+            return true;
         }
 
         private static int _reuseCount = 0;
+        /// <summary>These instructions can be reused between modules because they don't
+        /// hold any module dependent information.</summary>
         private static LoopInstruction[] _knownLoops = new LoopInstruction[256];
     }
 }

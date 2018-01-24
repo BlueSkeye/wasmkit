@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace WasmLib.Bytecode
 {
@@ -233,8 +231,8 @@ namespace WasmLib.Bytecode
 
         internal static readonly Instruction Unreachable = new ReusableInstruction(OpCodes.Unreachable);
         internal static readonly Instruction Nop = NopInstruction.Singleton; // No operation
-        internal static readonly Instruction Else = new ReusableInstruction(OpCodes.Else); // begin else expression of if
-        internal static readonly Instruction End = new EndInstruction(); // end a block, loop, or if
+        internal static readonly Instruction Else = ElseInstruction.Create(); // begin else expression of if
+        internal static readonly Instruction End = EndInstruction.Create(); // end a block, loop, or if
         internal static readonly Instruction Return = new ReusableInstruction(OpCodes.Return); // return zero or one value from this function
         internal static readonly Instruction Drop = new ReusableInstruction(OpCodes.Drop); // ignore value
         internal static readonly Instruction Select = new ReusableInstruction(OpCodes.Select); // select one of two values based on condition

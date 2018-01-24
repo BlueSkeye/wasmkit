@@ -20,6 +20,11 @@ namespace WasmLib
 
         internal List<string> Errors { get; private set; }
 
+        internal int LabelsCount
+        {
+            get { return Labels.Count; }
+        }
+
         private List<Tuple<BuiltinLanguageType, int, bool>> Labels { get; set; }
 
         internal void AddError(string message)
@@ -40,6 +45,23 @@ namespace WasmLib
                 return 0;
             }
             return _globalTypes[index];
+        }
+
+        /// <summary></summary>
+        /// <param name="relativeLabelIndex">The index is relative to the end. That is, 1 means
+        /// the most recently added label.</param>
+        /// <param name="label"></param>
+        /// <returns></returns>
+        internal bool GetLabel(uint relativeLabelIndex, out Tuple<BuiltinLanguageType, int, bool> label)
+        {
+            if (0 >= relativeLabelIndex) { throw new ArgumentOutOfRangeException(); }
+            int labelIndex = (int)(Labels.Count - relativeLabelIndex);
+            if (0 > labelIndex) {
+                label = default(Tuple<BuiltinLanguageType, int, bool>);
+                return false;
+            }
+            label = Labels[labelIndex];
+            return true;
         }
 
         internal BuiltinLanguageType GetLocalVariableType(uint index)
@@ -86,7 +108,6 @@ namespace WasmLib
 
         private void InitializeMemoryMap()
         {
-            
         }
 
         internal void Reset(FunctionDefinition forFunction = null)
@@ -109,6 +130,12 @@ namespace WasmLib
             else { _localTypes = _currentFunction.Locals ?? EmptyBuiltinLanguageType; }
         }
 
+        internal string StackLabelBarrier()
+        {
+            return string.Format("S={0},L={1},B={2}",
+                _stack.Count, Labels.Count, _currentStackBarrier);
+        }
+
         internal BuiltinLanguageType StackPeek(int depth)
         {
             return GetStackItem(_stack.Count - depth - 1);
@@ -117,8 +144,9 @@ namespace WasmLib
         internal BuiltinLanguageType StackPop()
         {
             int stackIndex = _stack.Count - 1;
-            try { return GetStackItem(stackIndex); }
-            finally { _stack.RemoveAt(stackIndex); }
+            BuiltinLanguageType result = GetStackItem(stackIndex);
+            if (0 != result) { _stack.RemoveAt(stackIndex); }
+            return result;
         }
 
         internal void StackPush(BuiltinLanguageType type)
@@ -129,41 +157,45 @@ namespace WasmLib
         internal bool ValidateElseOrEnd(OpCodes opcode)
         {
             if (0 == Labels.Count) {
-                Errors.Add("End instruction encountered with no matching block, loop or if.");
+                Errors.Add("End or Else instruction encountered with no matching block, loop or if.");
                 return false;
             }
             int labelTop = Labels.Count - 1;
             Tuple<BuiltinLanguageType, int, bool> label = Labels[labelTop];
             Labels.RemoveAt(labelTop);
+            int previousStackBarrier = (0 >= Labels.Count) ? 0 : Labels[Labels.Count - 1].Item2;
+            BuiltinLanguageType expectedType = label.Item1;
+            if (BuiltinLanguageType.EmptyBlock != expectedType) {
+                BuiltinLanguageType topOfStackType = StackPeek(0);
+                if (expectedType != topOfStackType) {
+                    Errors.Add(string.Format("Top of stack datatype {0} doesn't match End or Else instruction expected type {1}.",
+                        topOfStackType, expectedType));
+                    return false;
+                }
+                // Remove the block result from the stack for validation purpose, otherwise
+                // this would let us with an  unbalanced stack after Else completion later on.
+                StackPop();
+            }
+            if (label.Item2 != _stack.Count) {
+                Errors.Add("Unbalanced stack encountered on Else or End.");
+                return false;
+            }
             switch (opcode) {
                 case OpCodes.Else:
                     if (label.Item3) { CreateLabel(label.Item1, false); }
-                    else { Errors.Add("Else block encountered without maching if."); }
+                    else { Errors.Add("Else block encountered without maching If."); }
                     break;
                 case OpCodes.End:
+                    // Restore stack barrier to that of the previous block.
+                    _currentStackBarrier = previousStackBarrier;
+                    // Push back block result if any.
+                    if (BuiltinLanguageType.EmptyBlock != expectedType) {
+                        StackPush(expectedType);
+                    }
                     break;
                 default:
                     throw new ApplicationException();
             }
-            BuiltinLanguageType expectedType = label.Item1;
-            int expectedBarrierDelta;
-            if (BuiltinLanguageType.EmptyBlock != expectedType) {
-                expectedBarrierDelta = 1;
-                BuiltinLanguageType topOfStackType = StackPeek(0);
-                if (expectedType != topOfStackType) {
-                    Errors.Add(string.Format("Top of stack datatype {0} doesn't match End instruction expected type {1}.",
-                        topOfStackType, expectedType));
-                    return false;
-                }
-            }
-            else { expectedBarrierDelta = 0; }
-            int expectedStackSize = label.Item2 + expectedBarrierDelta;
-            if (expectedStackSize != _stack.Count) {
-                Errors.Add("Unbalanced stack encountered on End.");
-                return false;
-            }
-            // Restore stack barrier to that of the previous block.
-            _currentStackBarrier = (0 >= Labels.Count) ? 0 : Labels[Labels.Count - 1].Item2;
             return true;
         }
 

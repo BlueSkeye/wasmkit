@@ -42,6 +42,7 @@
     <Compile Include="Bytecode\BranchTableInstruction.cs" />
     <Compile Include="Bytecode\CallInstruction.cs" />
     <Compile Include="Bytecode\ConstantValueInstruction.cs" />
+    <Compile Include="Bytecode\ElseInstruction.cs" />
     <Compile Include="Bytecode\EndInstruction.cs" />
     <Compile Include="Bytecode\GlobalAccessorInstruction.cs" />
     <Compile Include="Bytecode\IfInstruction.cs" />

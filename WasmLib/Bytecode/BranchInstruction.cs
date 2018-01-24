@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WasmLib.Bytecode
 {
@@ -28,17 +24,15 @@ namespace WasmLib.Bytecode
             uint depth = reader.ReadVarUint32();
             bool conditional = (OpCodes.BrIf == opcode);
 
-            if (MaxReusableDepth < depth)
-            {
+            if (MaxReusableDepth < depth) {
                 return new BranchInstruction(opcode) { Conditional = conditional, Depth = depth };
             }
-            BranchInstruction[] reuseTargets = conditional ? _perDepthBranch : _perDepthConditionalBranch;
+            BranchInstruction[] reuseTargets = conditional ? _perDepthConditionalBranch : _perDepthBranch;
             BranchInstruction result = reuseTargets[depth];
 
             if (null != result) { _reuseCount++; }
-            else
-            {
-                result = new BranchInstruction(opcode) { Conditional = true, Depth = depth };
+            else {
+                result = new BranchInstruction(opcode) { Conditional = conditional, Depth = depth };
                 reuseTargets[depth] = result;
             }
             return result;
@@ -51,7 +45,33 @@ namespace WasmLib.Bytecode
 
         internal override bool Validate(ValidationContext context)
         {
-            throw new NotImplementedException();
+            BuiltinLanguageType poppedType;
+            if (Conditional) {
+                poppedType = context.StackPop();
+                if (BuiltinLanguageType.I32 != poppedType) {
+                    context.AddError(string.Format(
+                        "Expected an I32 for conditional branch evaluation. Found an {0}",
+                        poppedType.ToString()));
+                    return false;
+                }
+            }
+            Tuple<BuiltinLanguageType, int, bool> label;
+            if (!context.GetLabel(Depth, out label)) {
+                context.AddError(string.Format(
+                    "Attempt to retrieve label having relative index {0} while there is only {1} labels",
+                    Depth, context.LabelsCount));
+                return false;
+            }
+            if (BuiltinLanguageType.EmptyBlock != label.Item1) {
+                poppedType = context.StackPop();
+                if (label.Item1 != poppedType) {
+                    context.AddError(string.Format(
+                        "Attempt to exit label having relative index {0} with value having type {1} on top of stack while expecting type {2}",
+                        Depth, poppedType.ToString(), label));
+                    return false;
+                }
+            }
+            return true;
         }
 
         private const int MaxReusableDepth = 255;

@@ -1,9 +1,5 @@
 ﻿#define TRACE_CODE
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using WasmLib.Bytecode;
 
@@ -40,11 +36,15 @@ namespace WasmLib
             context.Reset(function);
             foreach (Instruction instruction in function.EnumerateInstructions()) {
 #if TRACE_CODE
-                Console.WriteLine(instruction.ToString());
+                Console.Write((++GlobalInstructionCounter).ToString() + " : "+ instruction.ToString() +
+                    " | " + context.StackLabelBarrier());
 #endif
                 // Must break immediately. Continuing is meaningless because the context is not
                 // accurate anymore.
                 if (!instruction.Validate(context)) { break; }
+#if TRACE_CODE
+                Console.WriteLine(" -> " + context.StackLabelBarrier());
+#endif
             }
             if (0 == context.Errors.Count) { return true; }
             Console.WriteLine("Error encountered on function #{0}", function.Id);
@@ -54,6 +54,7 @@ namespace WasmLib
             return false;
         }
 
+        private static int GlobalInstructionCounter = 0;
         private WasmModule _module;
     }
 }

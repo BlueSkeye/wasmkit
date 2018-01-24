@@ -37,6 +37,13 @@ namespace WasmLib.Bytecode
 
         internal override bool Validate(ValidationContext context)
         {
+            BuiltinLanguageType poppedType = context.StackPop();
+            if (BuiltinLanguageType.I32 != poppedType) {
+                context.AddError(string.Format(
+                    "Expected an I32 on top of the stack for if decision. Found an {1}.",
+                    poppedType.ToString()));
+                return false;
+            }
             context.CreateLabel(ValueType, true);
             return true;
         }

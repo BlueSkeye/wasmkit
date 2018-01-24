@@ -1,4 +1,7 @@
-﻿The base git repository for the documentation is at :
+﻿The webassembly site is at :
+http://webassembly.org/docs/high-level-goals/
+
+The base git repository for the documentation is at :
 https://github.com/WebAssembly/spec
 
 The formated documentation can be found at :
@@ -34,5 +37,6 @@ t.load memory execution algorithm m
 		∧ bytesi𝑁 (𝑛) = 𝑆.mems[𝐹.module.memaddrs[0]].data[ea : 𝑁/8])
 	𝑆; 𝐹; (i32.const 𝑘) (𝑡.load(𝑁_sx )
 		? memarg) ˓→ 𝑆; 𝐹;trap
-		(otherwise)
+		(otherwise)
+
 

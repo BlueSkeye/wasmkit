@@ -11,6 +11,7 @@ namespace WasmLib.Bytecode
         internal ReusableInstruction(OpCodes opcode)
             : base(opcode)
         {
+            return;
         }
 
         internal override bool Validate(ValidationContext context)
