@@ -7,6 +7,12 @@ https://github.com/WebAssembly/spec
 The formated documentation can be found at :
 https://webassembly.github.io/spec/core/index.html
 
+A fairly good introduction to Webassembly
+https://rsms.me/wasm-intro
+
+An interesting explanation of the text format
+https://developer.mozilla.org/en-US/docs/WebAssembly/Understanding_the_text_format
+
 t.load memory execution algorithm m
 1. Let 𝐹 be the current frame.
 2. Assert: due to validation, 𝐹.module.memaddrs[0] exists.

@@ -6,13 +6,6 @@ namespace WasmLib
 {
     internal class GlobalVariable
     {
-        internal GlobalVariable(ImportedGlobalDefinition definition)
-        {
-            Type = definition.Type;
-            Mutable = definition.Mutable;
-            Initializer = null;
-        }
-
         internal GlobalVariable(BuiltinLanguageType type, bool mutable, List<Instruction> initializer)
         {
             Type = type;

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WasmLib.Bytecode
 {
@@ -39,7 +35,6 @@ namespace WasmLib.Bytecode
 
         internal static MemoryAccessInstruction Create(BinaryParsingReader reader, OpCodes opcode)
         {
-            // uint localIndex = reader.ReadVarUint32();
             RawValueEncoding rawValue;
             bool store = false;
             switch (opcode) {
@@ -184,7 +179,7 @@ namespace WasmLib.Bytecode
                 case OpCodes.I64Load32_u:
                 case OpCodes.I64Store32:
                     transferedValueType = BuiltinLanguageType.I64;
-                    maxAlignment = 4;
+                    maxAlignment = 8;
                     break;
                 case OpCodes.F64Load:
                 case OpCodes.F64Store:

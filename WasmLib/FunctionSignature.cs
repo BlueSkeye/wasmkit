@@ -25,7 +25,9 @@ namespace WasmLib
                 result._parametersType.Add((BuiltinLanguageType)reader.ReadValueType());
             }
 
-            result.ReturnType = (1 == reader.ReadVarUint1()) ? (BuiltinLanguageType)reader.ReadValueType() : 0;
+            result.ReturnType = (1 == reader.ReadVarUint1())
+                ? (BuiltinLanguageType)reader.ReadValueType()
+                : BuiltinLanguageType.EmptyBlock;
             return result;
         }
 

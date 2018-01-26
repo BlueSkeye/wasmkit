@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 
 using WasmLib.Bytecode;
 
@@ -14,6 +12,11 @@ namespace WasmLib
         private WasmModule()
         {
             return;
+        }
+
+        internal int FunctionsCount
+        {
+            get { return _functionSignatures.Count; }
         }
 
         internal int GlobalsCount
@@ -53,20 +56,47 @@ namespace WasmLib
             foreach (FunctionDefinition function in _functions) { yield return function; }
         }
 
+        internal IEnumerable<ImportedFunctionDefinition> EnumerateFunctionImports()
+        {
+            foreach(ImportedFunctionDefinition function in EnumerateImports<ImportedFunctionDefinition>(ExternalKind.Function)) {
+                yield return function;
+            }
+        }
+
         internal IEnumerable<ImportedGlobalDefinition> EnumerateGlobalImports()
         {
-            foreach(List<ImportedItemDefinition> definitions in _perModuleImportedItems.Values) {
-                foreach(ImportedItemDefinition definition in definitions) {
-                    if (ExternalKind.Global == definition.Kind) {
-                        yield return (ImportedGlobalDefinition)definition;
-                    }
-                }
+            foreach(ImportedGlobalDefinition global in EnumerateImports<ImportedGlobalDefinition>(ExternalKind.Global)) {
+                yield return global;
+            }
+        }
+
+        internal IEnumerable<ImportedTableDefinition> EnumerateGlobalTables()
+        {
+            foreach (ImportedTableDefinition table in EnumerateImports<ImportedTableDefinition>(ExternalKind.Table)) {
+                yield return table;
             }
         }
 
         internal IEnumerable<GlobalVariable> EnumerateGlobalVariables()
         {
             foreach (GlobalVariable variable in _globalVariables) { yield return variable; }
+        }
+
+        private IEnumerable<T> EnumerateImports<T>(ExternalKind kind)
+            where T : ImportedItemDefinition
+        {
+            foreach(List<ImportedItemDefinition> definitions in _perModuleImportedItems.Values) {
+                foreach(ImportedItemDefinition definition in definitions) {
+                    if (kind == definition.Kind) {
+                        yield return (T)definition;
+                    }
+                }
+            }
+        }
+
+        internal FunctionSignature GetFunctionSignature(uint index)
+        {
+            return (_functionSignatures.Count <= index) ? null : _functionSignatures[(int)index];
         }
 
         /// <summary></summary>
@@ -208,40 +238,40 @@ namespace WasmLib
                 }
                 string fieldName = reader.ReadLengthPrefixedUTF8String();
                 ExternalKind kind = (ExternalKind)reader.ReadVarUint7();
+                bool maxPresent;
+                uint initialLength;
+                uint maximumLength;
                 switch (kind) {
                     case ExternalKind.Function:
-                        // Type index of function signature.
-                        reader.ReadVarUint32();
-                        break;
+                        imports.Add(new ImportedFunctionDefinition(fieldName, reader.ReadVarUint32()));
+                        continue;
                     case ExternalKind.Global:
                         bool mutable;
                         BuiltinLanguageType contentType = reader.ReadGlobaltype(out mutable);
                         imports.Add(new ImportedGlobalDefinition(fieldName, contentType, mutable));
                         continue;
                     case ExternalKind.Memory:
-                        {
-                            bool maxPresent = (0 != reader.ReadVarUint1());
-                            uint initial = reader.ReadVarUint32();
-                            uint maximum = maxPresent ? reader.ReadVarUint32() : 0;
-                        }
-                        break;
+                        maxPresent = (0 != reader.ReadVarUint1());
+                        initialLength = reader.ReadVarUint32();
+                        maximumLength = maxPresent ? reader.ReadVarUint32() : 0;
+                        imports.Add(new ImportedMemoryDefinition(fieldName, initialLength, maxPresent ? (uint?)maximumLength : null));
+                        continue;
                     case ExternalKind.Table:
                         BuiltinLanguageType elementType = (BuiltinLanguageType)reader.ReadVarInt7();
                         if (BuiltinLanguageType.AnyFunc != elementType) {
                             throw new WasmParsingException(string.Format(ParsingErrorMessages.UnexpectedBuiltinType,
                                 elementType, BuiltinLanguageType.AnyFunc));
                         }
-                        {
-                            bool maxPresent = (0 != reader.ReadVarUint1());
-                            uint initial = reader.ReadVarUint32();
-                            uint maximum = maxPresent ? reader.ReadVarUint32() : 0;
-                        }
-                        break;
+                        maxPresent = (0 != reader.ReadVarUint1());
+                        initialLength = reader.ReadVarUint32();
+                        maximumLength = maxPresent ? reader.ReadVarUint32() : 0;
+                        imports.Add(new ImportedTableDefinition(fieldName, elementType, initialLength,
+                            maxPresent ? (uint?)maximumLength : null));
+                        continue;
                     default:
                         throw new WasmParsingException(string.Format(
                             ParsingErrorMessages.UnrecognizedExternalKind, kind));
                 }
-                imports.Add(new ImportedItemDefinition(fieldName, kind));
             }
             // TODO Check for match between payloadSize and current stream position.
             return;

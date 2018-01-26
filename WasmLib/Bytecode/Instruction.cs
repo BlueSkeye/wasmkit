@@ -192,27 +192,27 @@ namespace WasmLib.Bytecode
                 case OpCodes.F64min: return BuiltinLanguageType.F64;
                 case OpCodes.F64max: return BuiltinLanguageType.F64;
                 case OpCodes.F64copysign: return BuiltinLanguageType.F64;
-                case OpCodes.I32wrapI64: throw new NotImplementedException();
-                case OpCodes.I32Trunc_sF32: throw new NotImplementedException();
-                case OpCodes.I32Trunc_uF32: throw new NotImplementedException();
-                case OpCodes.I32Trunc_sF64: throw new NotImplementedException();
-                case OpCodes.I32Trunc_uF64: throw new NotImplementedException();
-                case OpCodes.I64Extend_sI32: throw new NotImplementedException();
-                case OpCodes.I64Extend_uI32: throw new NotImplementedException();
-                case OpCodes.I64Trunc_sF32: throw new NotImplementedException();
-                case OpCodes.I64Trunc_uF32: throw new NotImplementedException();
-                case OpCodes.I64Trunc_sF64: throw new NotImplementedException();
-                case OpCodes.I64Trunc_uF64: throw new NotImplementedException();
-                case OpCodes.F32Convert_sI32: throw new NotImplementedException();
-                case OpCodes.F32Convert_uI32: throw new NotImplementedException();
-                case OpCodes.F32Convert_sI64: throw new NotImplementedException();
-                case OpCodes.F32Convert_uI64: throw new NotImplementedException();
-                case OpCodes.F32demoteF64: throw new NotImplementedException();
-                case OpCodes.F64Convert_sI32: throw new NotImplementedException();
-                case OpCodes.F64Convert_uI32: throw new NotImplementedException();
-                case OpCodes.F64Convert_sI64: throw new NotImplementedException();
-                case OpCodes.F64Convert_uI64: throw new NotImplementedException();
-                case OpCodes.F64PromoteF32: throw new NotImplementedException();
+                case OpCodes.I32wrapI64: return BuiltinLanguageType.I32;
+                case OpCodes.I32Trunc_sF32: return BuiltinLanguageType.I32;
+                case OpCodes.I32Trunc_uF32: return BuiltinLanguageType.I32;
+                case OpCodes.I32Trunc_sF64: return BuiltinLanguageType.I32;
+                case OpCodes.I32Trunc_uF64: return BuiltinLanguageType.I32;
+                case OpCodes.I64Extend_sI32: return BuiltinLanguageType.I64;
+                case OpCodes.I64Extend_uI32: return BuiltinLanguageType.I64;
+                case OpCodes.I64Trunc_sF32: return BuiltinLanguageType.I64;
+                case OpCodes.I64Trunc_uF32: return BuiltinLanguageType.I64;
+                case OpCodes.I64Trunc_sF64: return BuiltinLanguageType.I64;
+                case OpCodes.I64Trunc_uF64: return BuiltinLanguageType.I64;
+                case OpCodes.F32Convert_sI32: return BuiltinLanguageType.F32;
+                case OpCodes.F32Convert_uI32: return BuiltinLanguageType.F32;
+                case OpCodes.F32Convert_sI64: return BuiltinLanguageType.F32;
+                case OpCodes.F32Convert_uI64: return BuiltinLanguageType.F32;
+                case OpCodes.F32demoteF64: return BuiltinLanguageType.F32;
+                case OpCodes.F64Convert_sI32: return BuiltinLanguageType.F64;
+                case OpCodes.F64Convert_uI32: return BuiltinLanguageType.F64;
+                case OpCodes.F64Convert_sI64: return BuiltinLanguageType.F64;
+                case OpCodes.F64Convert_uI64: return BuiltinLanguageType.F64;
+                case OpCodes.F64PromoteF32: return BuiltinLanguageType.F64;
                 case OpCodes.I32ReinterpretF32: throw new NotImplementedException();
                 case OpCodes.I64ReinterpretF64: throw new NotImplementedException();
                 case OpCodes.F32ReinterpretI32: throw new NotImplementedException();
@@ -229,11 +229,11 @@ namespace WasmLib.Bytecode
 
         internal abstract bool Validate(ValidationContext context);
 
-        internal static readonly Instruction Unreachable = new ReusableInstruction(OpCodes.Unreachable);
+        internal static readonly Instruction Unreachable = UnreachableInstruction.Singleton;
         internal static readonly Instruction Nop = NopInstruction.Singleton; // No operation
-        internal static readonly Instruction Else = ElseInstruction.Create(); // begin else expression of if
-        internal static readonly Instruction End = EndInstruction.Create(); // end a block, loop, or if
-        internal static readonly Instruction Return = new ReusableInstruction(OpCodes.Return); // return zero or one value from this function
+        internal static readonly Instruction Else = ElseInstruction.Singleton; // begin else expression of if
+        internal static readonly Instruction End = EndInstruction.Singleton; // end a block, loop, or if
+        internal static readonly Instruction Return = ReturnInstruction.Singleton; // return zero or one value from this function
         internal static readonly Instruction Drop = new ReusableInstruction(OpCodes.Drop); // ignore value
         internal static readonly Instruction Select = new ReusableInstruction(OpCodes.Select); // select one of two values based on condition
         internal static readonly Instruction CurrentMemory = new ReusableInstruction(OpCodes.CurrentMemory); // reserved : varuint1 query the size of memory
@@ -336,27 +336,27 @@ namespace WasmLib.Bytecode
         internal static readonly Instruction F64Min = new BinaryInstruction(OpCodes.F64min);
         internal static readonly Instruction F64Max = new BinaryInstruction(OpCodes.F64max);
         internal static readonly Instruction F64CopySign = new BinaryInstruction(OpCodes.F64copysign);
-        internal static readonly Instruction I32WrapI64 = new ReusableInstruction(OpCodes.I32wrapI64);
-        internal static readonly Instruction I32TruncSF32 = new ReusableInstruction(OpCodes.I32Trunc_sF32);
-        internal static readonly Instruction I32TruncUF32 = new ReusableInstruction(OpCodes.I32Trunc_uF32);
-        internal static readonly Instruction I32TruncSF64 = new ReusableInstruction(OpCodes.I32Trunc_sF64);
-        internal static readonly Instruction I32TruncUF64 = new ReusableInstruction(OpCodes.I32Trunc_uF64);
-        internal static readonly Instruction I64ExtendSI32 = new ReusableInstruction(OpCodes.I64Extend_sI32);
-        internal static readonly Instruction I64ExtendUI32 = new ReusableInstruction(OpCodes.I64Extend_uI32);
-        internal static readonly Instruction I64TruncSF32 = new ReusableInstruction(OpCodes.I64Trunc_sF32);
-        internal static readonly Instruction I64TruncUF32 = new ReusableInstruction(OpCodes.I64Trunc_uF32);
-        internal static readonly Instruction I64TruncSF64 = new ReusableInstruction(OpCodes.I64Trunc_sF64);
-        internal static readonly Instruction I64TruncUF64 = new ReusableInstruction(OpCodes.I64Trunc_uF64);
-        internal static readonly Instruction F32ConvertSI32 = new ReusableInstruction(OpCodes.F32Convert_sI32);
-        internal static readonly Instruction F32ConvertUI32 = new ReusableInstruction(OpCodes.F32Convert_uI32);
-        internal static readonly Instruction F32ConvertSI64 = new ReusableInstruction(OpCodes.F32Convert_sI64);
-        internal static readonly Instruction F32ConvertUI64 = new ReusableInstruction(OpCodes.F32Convert_uI64);
-        internal static readonly Instruction F32DemoteF64 = new ReusableInstruction(OpCodes.F32demoteF64);
-        internal static readonly Instruction F64ConvertSI32 = new ReusableInstruction(OpCodes.F64Convert_sI32);
-        internal static readonly Instruction F64ConvertUI32 = new ReusableInstruction(OpCodes.F64Convert_uI32);
-        internal static readonly Instruction F64ConvertSI64 = new ReusableInstruction(OpCodes.F64Convert_sI64);
-        internal static readonly Instruction F64ConvertUI64 = new ReusableInstruction(OpCodes.F64Convert_uI64);
-        internal static readonly Instruction F64PromoteF32 = new ReusableInstruction(OpCodes.F64PromoteF32);
+        internal static readonly Instruction I32WrapI64 = ConversionInstruction.Create(OpCodes.I32wrapI64);
+        internal static readonly Instruction I32TruncSF32 = ConversionInstruction.Create(OpCodes.I32Trunc_sF32);
+        internal static readonly Instruction I32TruncUF32 = ConversionInstruction.Create(OpCodes.I32Trunc_uF32);
+        internal static readonly Instruction I32TruncSF64 = ConversionInstruction.Create(OpCodes.I32Trunc_sF64);
+        internal static readonly Instruction I32TruncUF64 = ConversionInstruction.Create(OpCodes.I32Trunc_uF64);
+        internal static readonly Instruction I64ExtendSI32 = ConversionInstruction.Create(OpCodes.I64Extend_sI32);
+        internal static readonly Instruction I64ExtendUI32 = ConversionInstruction.Create(OpCodes.I64Extend_uI32);
+        internal static readonly Instruction I64TruncSF32 = ConversionInstruction.Create(OpCodes.I64Trunc_sF32);
+        internal static readonly Instruction I64TruncUF32 = ConversionInstruction.Create(OpCodes.I64Trunc_uF32);
+        internal static readonly Instruction I64TruncSF64 = ConversionInstruction.Create(OpCodes.I64Trunc_sF64);
+        internal static readonly Instruction I64TruncUF64 = ConversionInstruction.Create(OpCodes.I64Trunc_uF64);
+        internal static readonly Instruction F32ConvertSI32 = ConversionInstruction.Create(OpCodes.F32Convert_sI32);
+        internal static readonly Instruction F32ConvertUI32 = ConversionInstruction.Create(OpCodes.F32Convert_uI32);
+        internal static readonly Instruction F32ConvertSI64 = ConversionInstruction.Create(OpCodes.F32Convert_sI64);
+        internal static readonly Instruction F32ConvertUI64 = ConversionInstruction.Create(OpCodes.F32Convert_uI64);
+        internal static readonly Instruction F32DemoteF64 = ConversionInstruction.Create(OpCodes.F32demoteF64);
+        internal static readonly Instruction F64ConvertSI32 = ConversionInstruction.Create(OpCodes.F64Convert_sI32);
+        internal static readonly Instruction F64ConvertUI32 = ConversionInstruction.Create(OpCodes.F64Convert_uI32);
+        internal static readonly Instruction F64ConvertSI64 = ConversionInstruction.Create(OpCodes.F64Convert_sI64);
+        internal static readonly Instruction F64ConvertUI64 = ConversionInstruction.Create(OpCodes.F64Convert_uI64);
+        internal static readonly Instruction F64PromoteF32 = ConversionInstruction.Create(OpCodes.F64PromoteF32);
         internal static readonly Instruction I32ReinterpretF32 = new ReusableInstruction(OpCodes.I32ReinterpretF32);
         internal static readonly Instruction I64ReinterpretF64 = new ReusableInstruction(OpCodes.I64ReinterpretF64);
         internal static readonly Instruction F32ReinterpretI32 = new ReusableInstruction(OpCodes.F32ReinterpretI32);

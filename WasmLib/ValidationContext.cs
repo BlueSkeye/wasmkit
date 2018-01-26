@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WasmLib
 {
@@ -15,10 +12,17 @@ namespace WasmLib
             Labels = new List<Tuple<BuiltinLanguageType, int, bool>>();
             _stack = new List<BuiltinLanguageType>();
             InitializeGlobalVariables();
+            InitializeFunctions();
             InitializeMemoryMap();
+            InitializeTables();
         }
 
         internal List<string> Errors { get; private set; }
+
+        internal BuiltinLanguageType FunctionReturnType
+        {
+            get { return _currentFunction.Signature.ReturnType; }
+        }
 
         internal int LabelsCount
         {
@@ -26,6 +30,11 @@ namespace WasmLib
         }
 
         private List<Tuple<BuiltinLanguageType, int, bool>> Labels { get; set; }
+
+        internal int StackSize
+        {
+            get { return _stack.Count; }
+        }
 
         internal void AddError(string message)
         {
@@ -38,6 +47,16 @@ namespace WasmLib
             Labels.Add(new Tuple<BuiltinLanguageType, int, bool>(type, (_currentStackBarrier = _stack.Count), allowReuseForElse));
         }
 
+        internal FunctionSignature GetFunctionSignature(uint index)
+        {
+            if (index >= _functions.Length) {
+                this.AddError(string.Format("Attempt to retrieve function #{0} while there is only {1} functions.",
+                    index, _functions.Length));
+                return null;
+            }
+            return _functions[(int)index];
+        }
+
         internal BuiltinLanguageType GetGlobalVariableType(uint index)
         {
             if (_globalTypes.Length <= index) {
@@ -47,6 +66,24 @@ namespace WasmLib
             return _globalTypes[index];
         }
 
+        internal FunctionSignature GetIndirectFunctionSignature(uint index)
+        {
+            if (0 > _tables.Length) {
+                Errors.Add("Indirect function signature can't be resolved because no table is defined.");
+                return null;
+            }
+            if (BuiltinLanguageType.AnyFunc != _tables[0].ElementType) {
+                Errors.Add("Indirect function signature can't be resolved because type of table[0] is not AnyFunc.");
+                return null;
+            }
+            if (index >= _tables.Length) {
+                Errors.Add(string.Format("Indirect function index {0} is greater than maximum allowed index {1}.",
+                    index, _tables.Length));
+                return null;
+            }
+            return _module.GetFunctionSignature(index);
+        }
+
         /// <summary></summary>
         /// <param name="relativeLabelIndex">The index is relative to the end. That is, 1 means
         /// the most recently added label.</param>
@@ -54,8 +91,8 @@ namespace WasmLib
         /// <returns></returns>
         internal bool GetLabel(uint relativeLabelIndex, out Tuple<BuiltinLanguageType, int, bool> label)
         {
-            if (0 >= relativeLabelIndex) { throw new ArgumentOutOfRangeException(); }
-            int labelIndex = (int)(Labels.Count - relativeLabelIndex);
+            if (0 > relativeLabelIndex) { throw new ArgumentOutOfRangeException(); }
+            int labelIndex = (int)(Labels.Count - relativeLabelIndex - 1);
             if (0 > labelIndex) {
                 label = default(Tuple<BuiltinLanguageType, int, bool>);
                 return false;
@@ -76,15 +113,24 @@ namespace WasmLib
         private BuiltinLanguageType GetStackItem(int stackIndex)
         {
             if (0 > stackIndex) { throw new ArgumentOutOfRangeException(); }
-            if (0 > stackIndex) {
-                Errors.Add(string.Format("Attempt to pop on empty stack."));
-                return 0;
-            }
             if (stackIndex < _currentStackBarrier) {
                 Errors.Add(string.Format("Attempt to pop a stack element beyond stack barrier."));
                 return 0;
             }
             return _stack[stackIndex];
+        }
+
+        private void InitializeFunctions()
+        {
+            List<FunctionSignature> functions = new List<FunctionSignature>();
+
+            foreach(ImportedFunctionDefinition function in _module.EnumerateFunctionImports()) {
+                functions.Add(_module.GetFunctionSignature(function.FunctionSignatureIndex));
+            }
+            foreach(FunctionDefinition function in _module.EnumerateFunctions()) {
+                functions.Add(function.Signature);
+            }
+            _functions = functions.ToArray();
         }
 
         private void InitializeGlobalVariables()
@@ -108,6 +154,16 @@ namespace WasmLib
 
         private void InitializeMemoryMap()
         {
+        }
+
+        private void InitializeTables()
+        {
+            List<ImportedTableDefinition> tables = new List<ImportedTableDefinition>();
+
+            foreach(ImportedTableDefinition table in _module.EnumerateGlobalTables()) {
+                tables.Add(table);
+            }
+            _tables = tables.ToArray();
         }
 
         internal void Reset(FunctionDefinition forFunction = null)
@@ -221,9 +277,11 @@ namespace WasmLib
         /// accessed by the current block. This means that any attempt to access the stack must be performed
         /// while the Stack.Count property is greater or equal to this value.</summary>
         private int _currentStackBarrier = 0;
+        private FunctionSignature[] _functions;
         private BuiltinLanguageType[] _globalTypes;
         private BuiltinLanguageType[] _localTypes;
         private WasmModule _module;
         private List<BuiltinLanguageType> _stack;
+        private ImportedTableDefinition[] _tables;
     }
 }

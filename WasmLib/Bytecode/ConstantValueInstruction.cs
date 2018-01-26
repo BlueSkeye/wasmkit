@@ -22,8 +22,7 @@ namespace WasmLib.Bytecode
         {
             ConstantValueInstruction<T> result;
 
-            if (_knownValues.TryGetValue(value, out result))
-            {
+            if (_knownValues.TryGetValue(value, out result)) {
                 _reuseCount++;
                 return result;
             }

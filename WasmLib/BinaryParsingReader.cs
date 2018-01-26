@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 
@@ -177,6 +176,28 @@ namespace WasmLib
                 case OpCodes.I64lt_u:
                 case OpCodes.I64ne:
                     return RelationalInstruction.Create(opcode);
+                case OpCodes.F32Convert_sI32:
+                case OpCodes.F32Convert_uI32:
+                case OpCodes.F32Convert_sI64:
+                case OpCodes.F32Convert_uI64:
+                case OpCodes.F32demoteF64:
+                case OpCodes.F64Convert_sI32:
+                case OpCodes.F64Convert_uI32:
+                case OpCodes.F64Convert_sI64:
+                case OpCodes.F64Convert_uI64:
+                case OpCodes.F64PromoteF32:
+                case OpCodes.I32Trunc_sF32:
+                case OpCodes.I32Trunc_uF32:
+                case OpCodes.I32Trunc_sF64:
+                case OpCodes.I32Trunc_uF64:
+                case OpCodes.I32wrapI64:
+                case OpCodes.I64Extend_sI32:
+                case OpCodes.I64Extend_uI32:
+                case OpCodes.I64Trunc_sF32:
+                case OpCodes.I64Trunc_uF32:
+                case OpCodes.I64Trunc_sF64:
+                case OpCodes.I64Trunc_uF64:
+                    return ConversionInstruction.Create(opcode);
                 default:
                     throw new NotSupportedException();
             }
