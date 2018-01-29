@@ -83,6 +83,7 @@
     <Compile Include="WasmModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WasmModuleSection.cs" />
+    <Compile Include="WasmModuleTextWriter.cs" />
     <Compile Include="WasmModuleValidator.cs" />
     <Compile Include="WasmParsingException.cs" />
   </ItemGroup>
@@ -94,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="KB.txt" />
+    <Content Include="TextRepresentation.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace WasmLib.Bytecode
 {
@@ -12,9 +13,14 @@ namespace WasmLib.Bytecode
 
         public uint Align { get; private set; }
 
+        internal static uint InstructionsCount { get; private set; }
+
         public bool IsLoad { get; private set; }
 
-        public bool IsStore { get; private set; }
+        public bool IsStore
+        {
+            get { return !IsLoad; }
+        }
 
         public uint Offset { get; private set; }
 
@@ -117,14 +123,21 @@ namespace WasmLib.Bytecode
             }
             uint flags = reader.ReadVarUint32();
             uint offset = reader.ReadVarUint32();
-            return new MemoryAccessInstruction(opcode) {
+            InstructionsCount++;
+            MemoryAccessInstruction result;
+
+            // if (_knownInstructions.TryGetValue(opcode, out result)) { return result; }
+            result = new MemoryAccessInstruction(opcode) {
                 _rawValue = rawValue,
-                IsStore = store,
                 IsLoad = !store,
                 Offset = offset,
                 Align = flags
             };
+            // _knownInstructions.Add(opcode, result);
+            return result;
         }
+
+        // private static Dictionary<OpCodes, MemoryAccessInstruction> _knownInstructions = new Dictionary<OpCodes, MemoryAccessInstruction>();
 
         public override string ToString()
         {

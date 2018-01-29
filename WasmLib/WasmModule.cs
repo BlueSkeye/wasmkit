@@ -48,6 +48,7 @@ namespace WasmLib
             Console.WriteLine("If reuse ratio = {0}.", IfInstruction.ReuseRatio);
             Console.WriteLine("Local accessor reuse ratio = {0}.", LocalAccessorInstruction.ReuseRatio);
             Console.WriteLine("Loop reuse ratio = {0}.", LoopInstruction.ReuseRatio);
+            Console.WriteLine("{0} memory access instructions.", MemoryAccessInstruction.InstructionsCount);
             Console.WriteLine("{0} memory control instructions.", MemoryControlInstruction.UseCount);
         }
 
@@ -402,6 +403,11 @@ namespace WasmLib
             }
             // TODO Check for match between payloadSize and current stream position.
             return;
+        }
+
+        public void ToText(Stream output)
+        {
+            new WasmModuleTextWriter(this).WriteTo(output);
         }
 
         /// <summary>Applies the validation process on this module.</summary>

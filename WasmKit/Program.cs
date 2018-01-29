@@ -13,6 +13,9 @@ namespace WasmKit
                 module = WasmModule.Create(input);
             }
             bool validModule = module.Validate();
+            using (FileStream output = File.Open(@".\sample.wat", FileMode.Create, FileAccess.Write)) {
+                module.ToText(output);
+            }
             return 0;
         }
     }
