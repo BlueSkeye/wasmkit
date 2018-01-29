@@ -43,6 +43,8 @@
     <Compile Include="Bytecode\CallInstruction.cs" />
     <Compile Include="Bytecode\ConstantValueInstruction.cs" />
     <Compile Include="Bytecode\ConversionInstruction.cs" />
+    <Compile Include="Bytecode\CurrentMemoryInstruction.cs" />
+    <Compile Include="Bytecode\DropInstruction.cs" />
     <Compile Include="Bytecode\ElseInstruction.cs" />
     <Compile Include="Bytecode\EndInstruction.cs" />
     <Compile Include="Bytecode\GlobalAccessorInstruction.cs" />
@@ -55,7 +57,8 @@
     <Compile Include="Bytecode\NopInstruction.cs" />
     <Compile Include="Bytecode\RelationalInstruction.cs" />
     <Compile Include="Bytecode\ReturnInstruction.cs" />
-    <Compile Include="Bytecode\ReusableInstruction.cs" />
+    <Compile Include="Bytecode\SelectInstruction.cs" />
+    <Compile Include="Bytecode\UnaryInstruction.cs" />
     <Compile Include="Bytecode\UnreachableInstruction.cs" />
     <Compile Include="ExternalKind.cs" />
     <Compile Include="FunctionDefinition.cs" />

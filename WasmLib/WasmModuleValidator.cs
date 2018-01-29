@@ -20,12 +20,7 @@ namespace WasmLib
             ValidationContext context = new ValidationContext(_module);
 
             Console.WriteLine("Validating functions body.");
-            int functionIndex = 0;
             foreach (FunctionDefinition function in _module.EnumerateFunctions()) {
-#if TRACE_CODE
-                Console.WriteLine("#{0} ==================================", ++functionIndex);
-                if (5 == functionIndex) { int i = 1; }
-#endif
                 result &= Validate(context, function);
             }
             return result;
@@ -33,28 +28,50 @@ namespace WasmLib
 
         private bool Validate(ValidationContext context, FunctionDefinition function)
         {
-            context.Reset(function);
-            foreach (Instruction instruction in function.EnumerateInstructions()) {
+            bool trace = false;
+            _functionIndex += 1;
+            while (true) {
+                context.Reset(function);
 #if TRACE_CODE
-                Console.Write((++GlobalInstructionCounter).ToString() + " : "+ instruction.ToString() +
-                    " | " + context.StackLabelBarrier());
+                if (trace) {
+                    Console.WriteLine("#{0} ==================================", _functionIndex);
+                }
 #endif
-                // Must break immediately. Continuing is meaningless because the context is not
-                // accurate anymore.
-                if (!instruction.Validate(context)) { break; }
+                foreach (Instruction instruction in function.EnumerateInstructions()) {
 #if TRACE_CODE
-                Console.WriteLine(" -> " + context.StackLabelBarrier());
+                    if (trace) {
+                        Console.Write((++GlobalInstructionCounter).ToString() + " : " + instruction.ToString() +
+                            " | " + context.StackLabelBarrier());
+                    }
 #endif
+                    // Must break immediately. Continuing is meaningless because the context is not
+                    // accurate anymore.
+                    if (!instruction.Validate(context)) { break; }
+#if TRACE_CODE
+                    if (trace) {
+                        Console.WriteLine(" -> " + context.StackLabelBarrier());
+                    }
+#endif
+                    context.LastInstructionWasReturn = (OpCodes.Return == instruction.OpCode);
+                }
+                if (0 == context.Errors.Count) { return true; }
+#if TRACE_CODE
+                if (!trace) {
+                    trace = true;
+                    continue;
+                }
+#endif
+                Console.WriteLine();
+                Console.WriteLine("Error encountered on function #{0}", function.Id);
+                foreach(string error in context.Errors) {
+                    Console.WriteLine(error);
+                }
+                return false;
             }
-            if (0 == context.Errors.Count) { return true; }
-            Console.WriteLine("Error encountered on function #{0}", function.Id);
-            foreach(string error in context.Errors) {
-                Console.WriteLine(error);
-            }
-            return false;
         }
 
         private static int GlobalInstructionCounter = 0;
+        private static int _functionIndex = 0;
         private WasmModule _module;
     }
 }

@@ -27,6 +27,8 @@ namespace WasmLib.Bytecode
                         expectedType, effectiveType));
                     return false;
                 }
+                BuiltinLanguageType poppedType = context.StackPop();
+                if (0 == poppedType) { return false; }
             }
             int stackSize = context.StackSize;
             if (0 != stackSize) {

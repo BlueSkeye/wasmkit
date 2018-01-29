@@ -31,6 +31,8 @@ namespace WasmLib
 
         private List<Tuple<BuiltinLanguageType, int, bool>> Labels { get; set; }
 
+        internal bool LastInstructionWasReturn { get; set; }
+
         internal int StackSize
         {
             get { return _stack.Count; }
@@ -76,12 +78,13 @@ namespace WasmLib
                 Errors.Add("Indirect function signature can't be resolved because type of table[0] is not AnyFunc.");
                 return null;
             }
-            if (index >= _tables.Length) {
-                Errors.Add(string.Format("Indirect function index {0} is greater than maximum allowed index {1}.",
-                    index, _tables.Length));
+            FunctionSignature result = _module.GetFunctionSignature(index);
+            if (null == result) {
+                Errors.Add(string.Format("Indirect function index {0} is greater than maximum allowed index.",
+                    index));
                 return null;
             }
-            return _module.GetFunctionSignature(index);
+            return result;
         }
 
         /// <summary></summary>
@@ -112,7 +115,10 @@ namespace WasmLib
 
         private BuiltinLanguageType GetStackItem(int stackIndex)
         {
-            if (0 > stackIndex) { throw new ArgumentOutOfRangeException(); }
+            if (0 > stackIndex) {
+                Errors.Add(string.Format("Attempt to peek a stack element out of stack range."));
+                return 0;
+            }
             if (stackIndex < _currentStackBarrier) {
                 Errors.Add(string.Format("Attempt to pop a stack element beyond stack barrier."));
                 return 0;
@@ -200,6 +206,9 @@ namespace WasmLib
         internal BuiltinLanguageType StackPop()
         {
             int stackIndex = _stack.Count - 1;
+            if (0 == _stack.Count) {
+                return 0;
+            }
             BuiltinLanguageType result = GetStackItem(stackIndex);
             if (0 != result) { _stack.RemoveAt(stackIndex); }
             return result;
@@ -221,20 +230,22 @@ namespace WasmLib
             Labels.RemoveAt(labelTop);
             int previousStackBarrier = (0 >= Labels.Count) ? 0 : Labels[Labels.Count - 1].Item2;
             BuiltinLanguageType expectedType = label.Item1;
-            if (BuiltinLanguageType.EmptyBlock != expectedType) {
-                BuiltinLanguageType topOfStackType = StackPeek(0);
-                if (expectedType != topOfStackType) {
-                    Errors.Add(string.Format("Top of stack datatype {0} doesn't match End or Else instruction expected type {1}.",
-                        topOfStackType, expectedType));
+            if (!LastInstructionWasReturn) {
+                if (BuiltinLanguageType.EmptyBlock != expectedType) {
+                    // Remove the block result from the stack for validation purpose, otherwise
+                    // this would let us with an  unbalanced stack after Else completion later on.
+                    BuiltinLanguageType poppedType = StackPop();
+                    if (0 == poppedType) { return false; }
+                    if (expectedType != poppedType) {
+                        Errors.Add(string.Format("Top of stack datatype {0} doesn't match End or Else instruction expected type {1}.",
+                            poppedType, expectedType));
+                        return false;
+                    }
+                }
+                if (label.Item2 != _stack.Count) {
+                    Errors.Add("Unbalanced stack encountered on Else or End.");
                     return false;
                 }
-                // Remove the block result from the stack for validation purpose, otherwise
-                // this would let us with an  unbalanced stack after Else completion later on.
-                StackPop();
-            }
-            if (label.Item2 != _stack.Count) {
-                Errors.Add("Unbalanced stack encountered on Else or End.");
-                return false;
             }
             switch (opcode) {
                 case OpCodes.Else:

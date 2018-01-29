@@ -36,12 +36,14 @@ namespace WasmLib.Bytecode
                     throw new ArgumentException();
             }
             BuiltinLanguageType stackType = context.StackPeek(0);
+            if (0 == stackType) { return false; }
             if (stackType != expectedType) {
                 context.AddError(string.Format("Unexpected {0} type on stack. Was expected {1})",
                     stackType, expectedType));
                 return false;
             }
-            context.StackPop();
+            BuiltinLanguageType poppedType = context.StackPop();
+            if (0 == poppedType) { return false; }
             context.StackPush(BuiltinLanguageType.I32);
             return true;
         }

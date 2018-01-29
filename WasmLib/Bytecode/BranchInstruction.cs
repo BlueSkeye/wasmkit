@@ -48,6 +48,7 @@ namespace WasmLib.Bytecode
             BuiltinLanguageType poppedType;
             if (Conditional) {
                 poppedType = context.StackPop();
+                if (0 == poppedType) { return false; }
                 if (BuiltinLanguageType.I32 != poppedType) {
                     context.AddError(string.Format(
                         "Expected an I32 for conditional branch evaluation. Found an {0}",
@@ -63,7 +64,8 @@ namespace WasmLib.Bytecode
                 return false;
             }
             if (BuiltinLanguageType.EmptyBlock != label.Item1) {
-                poppedType = context.StackPop();
+                poppedType = (Conditional) ? context.StackPeek(0) : context.StackPop();
+                if (0 == poppedType) { return false; }
                 if (label.Item1 != poppedType) {
                     context.AddError(string.Format(
                         "Attempt to exit label having relative index {0} with value having type {1} on top of stack while expecting type {2}",

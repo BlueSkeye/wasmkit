@@ -175,7 +175,7 @@ namespace WasmLib
                 case OpCodes.I64lt_s:
                 case OpCodes.I64lt_u:
                 case OpCodes.I64ne:
-                    return RelationalInstruction.Create(opcode);
+                    return RelationalInstruction.GetInstruction(opcode);
                 case OpCodes.F32Convert_sI32:
                 case OpCodes.F32Convert_uI32:
                 case OpCodes.F32Convert_sI64:
@@ -197,7 +197,7 @@ namespace WasmLib
                 case OpCodes.I64Trunc_uF32:
                 case OpCodes.I64Trunc_sF64:
                 case OpCodes.I64Trunc_uF64:
-                    return ConversionInstruction.Create(opcode);
+                    return ConversionInstruction.GetInstruction(opcode);
                 default:
                     throw new NotSupportedException();
             }

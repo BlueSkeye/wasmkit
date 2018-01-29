@@ -197,6 +197,7 @@ namespace WasmLib.Bytecode
 
             if (IsStore) {
                 BuiltinLanguageType valueType = context.StackPop();
+                if (0 == valueType) { return false; }
                 if (transferedValueType != valueType) {
                     context.AddError(string.Format("Expected an {0} value on the stack. Found an {1}",
                         transferedValueType.ToString(), valueType.ToString()));
@@ -204,6 +205,7 @@ namespace WasmLib.Bytecode
                 }
             }
             BuiltinLanguageType memoryAddressType = context.StackPop();
+            if (0 == memoryAddressType) { return false; }
             if (BuiltinLanguageType.I32 != memoryAddressType) {
                 context.AddError(string.Format("Expected an I32 on the stack. Found an {0}",
                     memoryAddressType.ToString()));

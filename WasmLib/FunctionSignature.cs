@@ -10,9 +10,17 @@ namespace WasmLib
 
         internal BuiltinLanguageType ReturnType { get; private set; }
 
-        internal IEnumerable<BuiltinLanguageType> EnumerateParameters()
+        internal IEnumerable<BuiltinLanguageType> EnumerateParameters(bool reverseOrder = false)
         {
-            foreach(BuiltinLanguageType type in _parametersType) { yield return type; }
+            if(0 == _parametersType.Count) { yield break; }
+            int startIndex = reverseOrder ? _parametersType.Count - 1 : 0;
+            int endIndex = reverseOrder ? 0 : _parametersType.Count - 1;
+            int increment = reverseOrder ? -1 : 1;
+            for(int index = startIndex; ; index += increment) {
+                yield return _parametersType[index];
+                if (endIndex == index) { break; }
+            }
+            yield break;
         }
 
         internal static FunctionSignature Parse(BinaryParsingReader reader)

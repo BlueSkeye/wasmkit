@@ -46,8 +46,9 @@ namespace WasmLib.Bytecode
                 if (null == signature) { return false; }
             }
             int parameterIndex = 0;
-            foreach(BuiltinLanguageType parameterType in signature.EnumerateParameters()) {
+            foreach(BuiltinLanguageType parameterType in signature.EnumerateParameters(true)) {
                 BuiltinLanguageType valueType = context.StackPeek(parameterIndex++);
+                if (0 == valueType) { return false; }
                 if (parameterType != valueType) {
                     context.AddError(string.Format(
                         "Parameter #{0} value has type {1} which doesn't match expected type {2}",
@@ -56,7 +57,10 @@ namespace WasmLib.Bytecode
                 }
             }
             // Pop parameter values
-            while (0 < parameterIndex--) { context.StackPop(); }
+            while (0 < parameterIndex--) {
+                BuiltinLanguageType poppedType = context.StackPop();
+                if (0 == poppedType) { return false; }
+            }
             // Push return type.
             BuiltinLanguageType returnType = signature.ReturnType;
             if (BuiltinLanguageType.EmptyBlock != returnType) { context.StackPush(returnType); }
